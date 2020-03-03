@@ -1,14 +1,13 @@
-import pynput
-from pynput.keyboard import Key
-from pynput.mouse import Button
+import directkeys as dk
+import random
+import time
 
 class Bot:
     """
     Bot class.
     """
     champ_name = "Darius"
-    keyboard = pynput.keyboard.Controller()
-    mouse = pynput.mouse.Controller()
+
     def __init__(self):
         self._active_time = 0
         print("Bot", self.champ_name, "initiated!")
@@ -19,23 +18,29 @@ class Bot:
     def _set_active_time(self, value):
         self._active_time = value
         print("active time modified !")
-
+    def wait(self):
+        time.sleep(random.random() + 0.1)
     def buy_item(self, item_name):
         """
         Try to buy an item from the shop by typing the name.
         """
         #Press p to open shop
-        self.keyboard.press('q')
+        dk.PressKey('p')
+        self.wait()
         # #Press ctrl+L to select search bar
-        # self.keyboard.press(Key.ctrl)
-        # self.keyboard.press('p')
-        # self.keyboard.release(Key.ctrl)
-        # #Type starter item name Doran shield
-        # self.keyboard.type(item_name)
-        # #Move mouse then click on the item icon
-        # self.mouse.position = (500, 500)
-        # self.mouse.click(Button.left)
-        self.keyboard.type('p')
-        #Press p to close shop
-
+        dk.MaintainKey('ctrl')
+        dk.PressKey('l')
+        dk.ReleaseKey('ctrl')
+        #Type starter item name Doran shield
+        dk.type_text(item_name)
+        # Press enter twice to buy
+        self.wait()
+        dk.PressKey("enter")
+        self.wait()
+        dk.PressKey("enter")
+        self.wait()
+        #Press esc to close shop
+        dk.PressKey('esc')
+        self.wait()
     active_time = property(_get_active_time, _set_active_time)
+        

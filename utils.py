@@ -1,6 +1,15 @@
 """Utilities functions"""
 import time
 
+def sleep(nb_secs=0.001):
+    """Pause the program for a duration"""
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            time.sleep(nb_secs)
+            func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 def check_exec_time():
     """Return the execution time of a function"""
 

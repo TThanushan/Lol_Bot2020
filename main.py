@@ -1,16 +1,13 @@
 """Main file"""
 import time
-import directkeys
+import directkeys as dk
 import Bot as botmod
 import pynput
+import ctypes
+import random
 
 time.sleep(2)
-
-directkeys.PressKey('a')
-### Buy items level 1
-#Press p to open shop
-#Press ctrl+L to select search bar
-#Type starter item name Doran shield
-#Move mouse then click on the item icon
-#Repeat for all items
-#Press p to close shop
+bot = botmod.Bot()
+bot.buy_item("doran's shield")
+bot.buy_item("health potion")
+bot.buy_item("warding totem")
