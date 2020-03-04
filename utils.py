@@ -1,7 +1,7 @@
 """Utilities functions"""
 import time
-
-def sleep(nb_secs=0.001):
+import random
+def sleep(nb_secs=random.uniform(0.005, 0.1)):
     """Pause the program for a duration"""
     def decorator(func):
         def wrapper(*args, **kwargs):
