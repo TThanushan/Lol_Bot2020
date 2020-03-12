@@ -16,7 +16,21 @@ To do:
 
 
 
+
 Notes:
+
+States :
+
+    Low life : True
+    
+    Ally minions near me ? : False
+    Ally champions near me ? : True
+
+    Enemy minions near me ? : True
+    Enemy champions near me ? : True
+
+
+
 main loop:
     while alive
         go to the furthest top tower (look on minimap for the furthest tower)

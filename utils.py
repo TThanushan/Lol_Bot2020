@@ -15,9 +15,9 @@ def check_exec_time():
 
     def decorator(func):
 
-        def wrapper():
+        def wrapper(*args, **kwargs):
             time_before = time.time()
-            ret = func()
+            ret = func(*args, **kwargs)
             time_after = time.time()
             exec_time = time_after - time_before
             print("Function {0} tooks {1} to execute.".format(func, exec_time))
