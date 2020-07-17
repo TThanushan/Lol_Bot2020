@@ -154,7 +154,7 @@ def MaintainKey(char_key):
               ki=KEYBDINPUT(wVk=hex_keycode))
     user32.SendInput(1, ctypes.byref(x), ctypes.sizeof(x))
 
-@utils.sleep()
+@utils.sleep(0.01)
 def type_text(text):
     for letter in text:
         PressKey(letter)

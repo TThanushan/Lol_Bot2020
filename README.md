@@ -7,13 +7,20 @@ Goals :
     - Buy items
 To do:
     <!-- - Buy items level 1. -->
-    - Move to the top.
-    - Wait for minions (Never move forward without minions).
-    - Attack minions.
-    - Teleport to the fountain if low life.
-    - Harass enemy champion.
-    - Commit for kill when enemy champion is low life.
-
+    - If at fountain
+        - See if can buy items
+        - Move to top
+            - Wait for a_minions (Never move forward without minions).
+                - Follow a_minions
+                - If e_minions
+                    -Attack e_minions.
+                - If e_champion
+                    - Harass e_champion.
+                - Commit for kill when enemy champion is low life.
+                - If low life
+                    - Go under near a_tower
+    <---------------- Teleport to fountain .
+                
 
 
 

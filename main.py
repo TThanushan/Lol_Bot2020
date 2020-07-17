@@ -2,12 +2,13 @@
 import cv2
 import Bot as botmod
 import threading
-
+import time
+import image_functions
 bot = botmod.Bot()
 
 def createTrackbar(name, win_name, value, count):
     def nothing(x):
-        print(x)
+        x += 0
     cv2.namedWindow(win_name)
     cv2.createTrackbar(name, win_name, value, count, nothing)    
 
@@ -17,7 +18,7 @@ def change_color(bool_v):
     return (0, 0, 255)
 
 def create_app_win():
-    # win = cv2.namedWindow("Wombot")
+    win = cv2.namedWindow("Wombot")
     # createTrackbar("pt1x", "Wombot", 0, 1000)
     # createTrackbar("pt1y", "Wombot", 0, 1000)
     # createTrackbar("pt2x", "Wombot", 0, 1000)
@@ -34,24 +35,27 @@ def create_app_win():
         color = (0, 0, 255)
         # cv2.rectangle(img, pt1, pt2, color, 6)
         # low_life
-        color = change_color(bot.screen_infos["low_life"])
+        color = change_color(bot.screen_infos.low_life)
         cv2.rectangle(img, (250, 35), (507, 127), color, 6)
         # a_minions
-        color = change_color(bot.screen_infos["a_minions"])
-        cv2.rectangle(img, (58, 188), (180, 315), color, 6)
+        color = change_color(bot.screen_infos.ally_minions)
+        cv2.rectangle(img, (58, 188), (180, 310), color, 6)
         # e_minions
-        color = change_color(bot.screen_infos["e_minions"])
-        cv2.rectangle(img, (230, 190), (358, 315), color, 6)
+        color = change_color(bot.screen_infos.enemy_minions)
+        cv2.rectangle(img, (230, 190), (358, 310), color, 6)
         # a_champions
-        color = change_color(bot.screen_infos["a_champions"])
-        cv2.rectangle(img, (408, 190), (535, 315), color, 6)
+        color = change_color(bot.screen_infos.ally_minions)
+        cv2.rectangle(img, (408, 190), (535, 310), color, 6)
         # e_champions
-        color = change_color(bot.screen_infos["e_champions"])
-        cv2.rectangle(img, (590, 190), (722, 315), color, 6)
+        color = change_color(bot.screen_infos.enemy_champions)
+        cv2.rectangle(img, (590, 190), (722, 310), color, 6)
 
         # at_fountain
-        color = change_color(bot.screen_infos["at_fountain"])
+        color = change_color(bot.screen_infos.at_fountain)
         cv2.rectangle(img, (20, 47), (210, 150), color, 6)
+        
+        # gold
+        img = cv2.putText(img, str(bot.screen_infos.gold), (620, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (210, 255, 255), 2)
         
         # Action
         img = cv2.putText(img, bot.action, (300, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
@@ -64,13 +68,21 @@ def create_app_win():
     cv2.destroyAllWindows()
 
 def main():
-    t1 = threading.Thread(target=create_app_win)
-    t2 = threading.Thread(target=bot.update_screen_infos)
-    t3 = threading.Thread(target=bot.behavior_loop)
+    t_app = threading.Thread(target=create_app_win)
+    t1 = threading.Thread(target=bot.fast_thread)
+    t2 = threading.Thread(target=bot.middle_thread)
+    t3 = threading.Thread(target=bot.slow_thread)
+    # t4 = threading.Thread(target=bot.behavior_loop)
+    t_app.start()
 
     t1.start()
     t2.start()
     t3.start()
-
+    # t4.start()
+    
+# time.sleep(2)
+# bot.do_once()
 main()
-
+# print(image_functions.is_at_fountain())
+# while True:
+#     print(image_functions.is_ally_minions_near_me())
