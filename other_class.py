@@ -47,7 +47,10 @@ class ItemBuild:
     def close_shop():
         dk.PressKey('esc')
     
-    def have_enough_money(self):
+    def try_to_buy_current_item(self, screen_infos):
+        """
+        Try to buy an item from the shop by typing the name.
+        """
         current_gold = imf.get_gold()
         if current_gold >= self.get_current_item_price():
             open_shop()
@@ -60,35 +63,6 @@ class ItemBuild:
                 if self.current_index not in self.build_order:
                     break
             self.close_shop()
-
-    def buy_current_item(self, screen_infos):
-        """
-        Try to buy an item from the shop by typing the name.
-        """
-        #Press p to open shop
-        screen_infos["gold"] = imf.get_gold()
-        if screen_infos["gold"] >= self.get_current_item_price():
-            dk.PressKey(self.shortcut["toggle shop"])
-            while screen_infos["gold"] >= self.get_current_item_price():
-                # #Press ctrl+L to select search bar
-                dk.MaintainKey('ctrl')
-                dk.PressKey('l')
-                dk.ReleaseKey('ctrl')
-                #Type starter item name Doran shield
-                dk.type_text(self.get_current_item_name())
-                # Press enter twice to buy
-                dk.PressKey("enter")
-                time.sleep(0.1 + random.random())
-                dk.PressKey("enter")
-                time.sleep(0.1 + random.random())
-                screen_infos["gold"] -= self.get_current_item_price() 
-                self.item_index += 1
-                if self.item_index not in self.items_build:
-                    break
-                # print("item nb :"+str(self.item_index))
-                # print("gold :"+str(screen_infos["gold"]))
-            #Press esc to close shop
-            dk.PressKey('esc')
 
 
 class ScreenInfos:

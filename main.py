@@ -4,6 +4,7 @@ import Bot as botmod
 import threading
 import time
 import image_functions
+from bot_functions import *
 bot = botmod.Bot()
 
 def createTrackbar(name, win_name, value, count):
@@ -72,17 +73,18 @@ def main():
     t1 = threading.Thread(target=bot.fast_thread)
     t2 = threading.Thread(target=bot.middle_thread)
     t3 = threading.Thread(target=bot.slow_thread)
-    # t4 = threading.Thread(target=bot.behavior_loop)
+    #t4 = threading.Thread(target=bot.behavior_loop)
     t_app.start()
 
     t1.start()
     t2.start()
     t3.start()
-    # t4.start()
-    
+    #t4.start()
 # time.sleep(2)
 # bot.do_once()
-main()
+#main()
+#create_app_win()
 # print(image_functions.is_at_fountain())
-# while True:
-#     print(image_functions.is_ally_minions_near_me())
+#while True:
+#    print('ally minions nb: ' + str(get_ally_minion_nb()))
+    #print('enemy minions nb: ' + str(get_enemy_minion_nb()))

@@ -6,6 +6,25 @@ import utils
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
+class H_S_V:
+    lower_hue = 0
+    lower_saturation = 0
+    lower_value = 0
+    upper_hue = 360
+    upper_saturation = 100
+    upper_value = 100
+    upper_bound = np.array([upper_hue, upper_saturation, upper_value])
+    lower_bound = np.array([lower_hue, lower_saturation, lower_value])
+    def __init__(self, l_h, l_s, l_v, u_h, u_s, u_v):
+        self.lower_hue = l_h
+        self.lower_saturation = l_s
+        self.lower_value = l_v
+        self.upper_hue = u_h
+        self.upper_saturation = u_s
+        self.upper_value = u_v
+        upper_bound = np.array([upper_hue, upper_saturation, upper_value])
+        lower_bound = np.array([lower_hue, lower_saturation, lower_value])
+
 def capture_screen(pos_x=0, pos_y=0, width=1920, height=1080, resize=1):
     """capture_screen(pos_x, pos_y, width, height, resize) -> image\n
     Return an screen capture under image format, you can resize it, 
@@ -54,24 +73,6 @@ def get_nb_image_occurence_on_screen(image_name, threshold_value=0.99):
             pt_y_save = pt[1]
     return nb
 
-# Think there is a enemey when looking at the herald health bar.
-def get_nb_enemy_champion_on_screen():
-    return get_nb_image_occurence_on_screen("enemy_champion_health_bar.png", 0.95)
-
-def get_nb_ally_champion_on_screen():
-    return get_nb_image_occurence_on_screen("ally_champion_health_bar.png", 0.98)
-
-def is_starting_on_left_side():
-    return is_image_on_screen("minimap_mid_tower.png")
-
-def is_enemy_champion_near_me():
-    return is_image_on_screen("enemy_champion_health_bar.png", 0.95)
-
-def is_ally_champion_near_me():
-    return is_image_on_screen("ally_champion_health_bar.png", 0.98)
-
-def is_low_life():
-    return not is_image_on_screen("low_life_indication.png", 0.96)
 def get_moving_object_by_size(size_wanted=1000):
     """Get position of a moving object that's equal to the size given
     in parameter"""
@@ -119,68 +120,15 @@ def is_obj_of_color_moving(obj_size, l_h, l_s, l_v, u_h, u_s, u_v, pt1=(0, 0), p
     frame1 = apply_hsv_color_mask(capture_screen(), l_h, l_s, l_v, u_h, u_s, u_v)
     frame2 = apply_hsv_color_mask(capture_screen(), l_h, l_s, l_v, u_h, u_s, u_v)
     return is_obj_moving(frame1, frame2, obj_size)
+
 def hide_image_outer_area(frames, pt1, pt2, color=(0, 0, 0)):
     for frame in frames:
         cv2.rectangle(frame, (0, 0), (1920, pt1[1]), color, -1)
         cv2.rectangle(frame, (0, pt1[1]), (pt1[0], 1080), color, -1)
         cv2.rectangle(frame, (pt2[0], pt1[1]), (1920, 1080), color, -1)
         cv2.rectangle(frame, (0, pt2[1]), (1920, 1080), color, -1)
-def get_minion_contours(obj_size, l_b, u_b):
-    frame = capture_screen(resize=1.5)
-    res = apply_hsv_color_mask(frame, l_b[0], l_b[1], l_b[2], u_b[0], u_b[1],\
-            u_b[2])
-    hide_image_outer_area([res], (240, 80), (960, 560))
-    gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
-    dilated = cv2.dilate(thresh, None, iterations=3)
-    contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    return contours
 
-def get_minion_nb(obj_size, l_b, u_b):
-    occurence = 0
-    contours = get_minion_contours(obj_size, l_b, u_b)
-    for contour in contours:
-        contour_area = cv2.contourArea(contour)
-        if (obj_size / 2) < contour_area < obj_size:
-            occurence += 1
-    return occurence
 
-def get_minions_position(obj_size, l_b, u_b):
-    ret = []
-    contours = get_minion_contours(obj_size, l_b, u_b)
-    for contour in contours:
-        contour_area = cv2.contourArea(contour)
-        if (obj_size / 2) < contour_area < obj_size:
-            (x, y, _, _) = cv2.boundingRect(contour)
-            ret.append((round((x*1.5)+40), round((y*1.5)+60)))
-    return ret
-
-A_MINIONS_HSV = {
-    "size" : 420,
-    "l_b" : [100, 125, 130],
-    "u_b" : [105, 185, 190]
-    }
-E_MINIONS_HSV = {
-    "size" : 640,
-    "l_b" : [0, 115, 130],
-    "u_b" : [4, 150, 195]
-    }
-def get_a_minion_pos():
-    return get_minions_position(A_MINIONS_HSV["size"], A_MINIONS_HSV["l_b"],\
-             A_MINIONS_HSV["u_b"])
-def get_e_minion_pos():
-    return get_minions_position(E_MINIONS_HSV["size"], E_MINIONS_HSV["l_b"],\
-             E_MINIONS_HSV["u_b"])
-def get_a_minion_nb():
-    return get_minion_nb(A_MINIONS_HSV["size"], A_MINIONS_HSV["l_b"],\
-             A_MINIONS_HSV["u_b"])
-def get_e_minion_nb():
-    return get_minion_nb(E_MINIONS_HSV["size"], E_MINIONS_HSV["l_b"],\
-             E_MINIONS_HSV["u_b"])
-
-def is_at_fountain():
-    return is_image_on_screen("shop_button_highlighted.png")
 def screen_text_to_string(area_pt1, area_pt2, reverse_color=False, mask=None):
     """Return digits from an area on the screen to string.\n
     Work only if the background color is lighter than the text color.\n
@@ -196,21 +144,7 @@ def screen_text_to_string(area_pt1, area_pt2, reverse_color=False, mask=None):
         text = pytesseract.image_to_string(img, lang='eng', config='--psm 10 \
                 --oem 3 -c tessedit_char_whitelist=0123456789')
         return text
-# @utils.check_exec_time()
-def get_gold():
-    """Return current gold"""
-    img = capture_screen()
-    hide_image_outer_area([img], (1143, 1055), (1206, 1070))
-    
-    img = apply_hsv_color_mask(img, 0, 50, 75, 255, 255, 255)
-    img = cv2.resize(img, (round(1920*1.5), round(1080*1.5)))
-    img = cv2.bitwise_not(img)
-    text = pytesseract.image_to_string(img, lang='eng', config='--psm 10\
-     --oem 3 -c tessedit_char_whitelist=0123456789')
-    img = cv2.resize(img, (round(1920/2), round(1080/2)))
-    if text == '':
-        text = 0
-    return int(text)
+
 # def is_item_bought(size_v):
     # return is_obj_of_color_moving(size_v, 81, 88, 135, 87, 125, 255, (720, 887), (1034, 944), resize=4)
     
