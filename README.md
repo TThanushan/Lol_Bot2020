@@ -1,5 +1,12 @@
 # Lol_Bot2020
 
+video settings:
+0
+0
+0
+100
+
+
 Goals :
     (Playing Darius)
     - Beat beginner bot (top lane)

@@ -5,8 +5,8 @@ import threading
 import time
 import image_functions
 from bot_functions import *
+import sys
 bot = botmod.Bot()
-
 def createTrackbar(name, win_name, value, count):
     def nothing(x):
         x += 0
@@ -18,54 +18,50 @@ def change_color(bool_v):
         return (0, 255, 0)
     return (0, 0, 255)
 
+COLORS = {
+    "White" : [255, 255, 255],
+    "Red" : [255, 42, 0],
+    "Green" : [130, 245, 157],
+    "Yellow" : [255, 213, 0],
+    "Blue" : [3, 190, 252],
+    "Cyan" : [148, 228, 255],
+    "Orange" : [255, 213, 0],
+    }
+TEXT_COLORS = [COLORS["Green"],
+               COLORS["Blue"],
+               COLORS["White"],
+               COLORS["Cyan"],
+               COLORS["Orange"],
+               COLORS["Red"],
+               COLORS["Orange"],
+               COLORS["Green"],
+               COLORS["Yellow"],
+               ]
+def RGB2BGR(color):
+    return (color[2], color[1], color[0])
+def display_all_screen_infos(img):
+    x_text_pos = 50
+    y_text_pos = 70
+    y_spacing = 50
+    all_infos = bot.screen_infos.get_all_properties()
+    color_index = 0
+    for attr in all_infos:
+        img = cv2.putText(img, attr + ': ' + str(all_infos[attr]), (x_text_pos, y_text_pos),\
+            cv2.FONT_HERSHEY_SIMPLEX, 1, RGB2BGR(TEXT_COLORS[color_index]), 2)
+        y_text_pos = y_text_pos + y_spacing
+        color_index = color_index + 1
+
 def create_app_win():
     win = cv2.namedWindow("Wombot")
-    # createTrackbar("pt1x", "Wombot", 0, 1000)
-    # createTrackbar("pt1y", "Wombot", 0, 1000)
-    # createTrackbar("pt2x", "Wombot", 0, 1000)
-    # createTrackbar("pt2y", "Wombot", 0, 1000)
-    while True:
-
-        # pt1x = cv2.getTrackbarPos("pt1x", "Wombot")
-        # pt1y = cv2.getTrackbarPos("pt1y", "Wombot")
-        # pt2x = cv2.getTrackbarPos("pt2x", "Wombot")
-        # pt2y = cv2.getTrackbarPos("pt2y", "Wombot")
-        # pt1 = (pt1x, pt1y)
-        # pt2 = (pt2x, pt2y)
-        img = cv2.imread("ressources/gui/gui_bg.png")
-        color = (0, 0, 255)
-        # cv2.rectangle(img, pt1, pt2, color, 6)
-        # low_life
-        color = change_color(bot.screen_infos.low_life)
-        cv2.rectangle(img, (250, 35), (507, 127), color, 6)
-        # a_minions
-        color = change_color(bot.screen_infos.ally_minions)
-        cv2.rectangle(img, (58, 188), (180, 310), color, 6)
-        # e_minions
-        color = change_color(bot.screen_infos.enemy_minions)
-        cv2.rectangle(img, (230, 190), (358, 310), color, 6)
-        # a_champions
-        color = change_color(bot.screen_infos.ally_minions)
-        cv2.rectangle(img, (408, 190), (535, 310), color, 6)
-        # e_champions
-        color = change_color(bot.screen_infos.enemy_champions)
-        cv2.rectangle(img, (590, 190), (722, 310), color, 6)
-
-        # at_fountain
-        color = change_color(bot.screen_infos.at_fountain)
-        cv2.rectangle(img, (20, 47), (210, 150), color, 6)
-        
-        # gold
-        img = cv2.putText(img, str(bot.screen_infos.gold), (620, 120), cv2.FONT_HERSHEY_SIMPLEX, 1, (210, 255, 255), 2)
-        
-        # Action
-        img = cv2.putText(img, bot.action, (300, 500), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2)
-        
+    img = cv2.imread("ressources/gui/background.png")
+    while bot.running:
+        img = cv2.imread("ressources/gui/background.png")
+        display_all_screen_infos(img)
         img = cv2.resize(img, (500, 425), interpolation=cv2.INTER_AREA)
         cv2.imshow("Wombot", img)
-        # cv2.resizeWindow("Wombot", 500, 500)
-        cv2.waitKey(1)
-
+        key_pressed = cv2.waitKey(1)
+        if str(key_pressed) == '27':
+            bot.running = False
     cv2.destroyAllWindows()
 
 def main():
@@ -79,12 +75,21 @@ def main():
     t1.start()
     t2.start()
     t3.start()
+
     #t4.start()
 # time.sleep(2)
 # bot.do_once()
-#main()
 #create_app_win()
 # print(image_functions.is_at_fountain())
-#while True:
-#    print('ally minions nb: ' + str(get_ally_minion_nb()))
-    #print('enemy minions nb: ' + str(get_enemy_minion_nb()))
+
+main()
+
+
+#@utils.check_exec_time()
+#def speed_test():
+#    print(str(get_current_mana()))
+
+#def test():
+#    while True:
+#        speed_test()
+#test()

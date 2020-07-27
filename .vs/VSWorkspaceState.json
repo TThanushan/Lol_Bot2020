@@ -1,9 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\ressources",
-    "\\ressources\\Test"
+    "\\ressources"
   ],
-  "SelectedNode": "\\bot_functions.py",
+  "SelectedNode": "\\main.py",
   "PreviewInSolutionExplorer": false
 }

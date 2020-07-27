@@ -66,12 +66,28 @@ class ItemBuild:
 
 
 class ScreenInfos:
-    ally_minions = False
-    ally_champions = False
-    enemy_minions = False
-    enemy_champions = False
-    low_life = False
-    at_fountain = False
+    def get_all_properties(self):
+        return {
+            "Health" : str(self.current_health) + " / " + str(self.max_health),
+            "Mana" : str(self.current_mana) + " / " + str(self.max_mana),        
+            "Allied minions" : self.allied_minions_nb,
+            "Allied champions" : self.allied_champions_nb,
+            "Enemy minions" : self.enemy_minions_nb,
+            "Enemy champions" : self.enemy_champions_nb,
+            "is low life" : self.current_health < 200,
+            "is at fountain" : self.is_at_fountain,
+            "gold" : self.gold
+            }
+    
+    current_health = 0
+    max_health = 0
+    current_mana = 0
+    max_mana = 0
+    allied_minions_nb = 0
+    allied_champions_nb = 0
+    enemy_minions_nb = 0
+    enemy_champions_nb = 0
+    is_at_fountain = False
     gold = 0
 
 

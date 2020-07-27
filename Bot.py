@@ -5,10 +5,13 @@ import image_functions as imf
 import threading
 import utils
 from other_class import *
+from bot_functions import *
+
 class Bot:
     """
     Bot class.
     """
+    running = True
     shortcut = Shortcut()
     item_build = ItemBuild()
     screen_infos = ScreenInfos()
@@ -39,35 +42,39 @@ class Bot:
         dk.mouse_right_click()
 
     def update_crucial_data(self):
-        self.screen_infos.low_life = imf.is_low_life()
-        self.screen_infos.ally_minions = imf.get_a_minion_nb()
-        self.screen_infos.enemy_champions = imf.is_enemy_champion_near_me()
+        self.screen_infos.current_health = get_current_health()
+        self.screen_infos.allied_minions_nb = get_nb_allied_minion()
+        self.screen_infos.enemy_champions_nb = get_nb_enemy_champion()
+        self.screen_infos.current_health = get_current_health()
 
     def update_useful_data(self):
-        self.screen_infos.ally_champions = imf.is_ally_champion_near_me()
-        self.screen_infos.enemy_minions = imf.get_e_minion_nb()
+        self.screen_infos.allied_champions_nb = get_nb_allied_champion()
+        self.screen_infos.enemy_minions_nb = get_nb_enemy_minion()
+        self.screen_infos.max_health = get_max_health()
+        self.screen_infos.current_mana = get_current_mana()
+        self.screen_infos.max_mana = get_max_mana()
 
     def update_minor_data(self):
-        self.screen_infos.at_fountain = imf.is_at_fountain()
-        self.screen_infos.gold = imf.get_gold()
+        self.screen_infos.is_at_fountain = is_at_fountain()
+        self.screen_infos.gold = get_gold()
 
     def fast_thread(self):
-        while True:
+        while self.running:
             self.update_crucial_data()
 
     def middle_thread(self):    
-        while True:
+        while self.running:
             self.update_useful_data()
 
     def slow_thread(self):
-        while True:
+        while self.running:
             self.update_minor_data()
 
     def behavior_loop(self):
-        while True:
+        while self.running:
             if self.screen_infos.at_fountain:
                 self.item_build.try_to_buy_current_item()
                 self.move_forward()
                 time.sleep(2)
-                if self.screen_infos.ally_minions:
+                if self.screen_infos.allied_minions_nb:
                     print("bip")
