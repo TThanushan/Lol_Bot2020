@@ -2,11 +2,12 @@
 import cv2
 import Bot as botmod
 import threading
-import time
-import image_functions
+from time import time 
+import os
 from bot_functions import *
-import sys
+
 bot = botmod.Bot()
+
 def createTrackbar(name, win_name, value, count):
     def nothing(x):
         x += 0
@@ -64,32 +65,45 @@ def create_app_win():
             bot.running = False
     cv2.destroyAllWindows()
 
+max_nb = 0
+def test():
+    global max_nb
+    if bot.screen_infos.enemy_minions_nb != max_nb:
+        max_nb = bot.screen_infos.enemy_minions_nb
+        print(max_nb)
+
 def main():
     t_app = threading.Thread(target=create_app_win)
-    t1 = threading.Thread(target=bot.fast_thread)
-    t2 = threading.Thread(target=bot.middle_thread)
-    t3 = threading.Thread(target=bot.slow_thread)
+    t1 = threading.Thread(target=bot.crucial_thread)
+    t2 = threading.Thread(target=bot.normal_thread)
+    #t3 = threading.Thread(target=bot.slow_thread)
     #t4 = threading.Thread(target=bot.behavior_loop)
-    t_app.start()
 
+    t_app.start()
     t1.start()
     t2.start()
-    t3.start()
-
+    #t3.start()
     #t4.start()
-# time.sleep(2)
-# bot.do_once()
 #create_app_win()
-# print(image_functions.is_at_fountain())
 
 main()
 
+"""
+import window_capture
 
-#@utils.check_exec_time()
-#def speed_test():
-#    print(str(get_current_mana()))
+wincap = window_capture.WindowCapture('League of Legends')
+loop_time = time()
+while True:
+    
+   screenshot = wincap.get_screenshot()
+   cv2.imshow('Computer Vision', screenshot)
+    
+   if time() - loop_time != 0:
+       print('FPS {}'.format(1 / (time() - loop_time)))
+   loop_time = time()
 
-#def test():
-#    while True:
-#        speed_test()
-#test()
+   if cv2.waitKey(1) == ord('q'):
+       cv2.destroyAllWindows()
+       break
+print('done')
+"""

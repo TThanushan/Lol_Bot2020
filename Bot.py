@@ -40,35 +40,33 @@ class Bot:
     def move_forward(self):
         dk.mouse_pos(self.forward_pos[0], self.forward_pos[1])
         dk.mouse_right_click()
-
-    def update_crucial_data(self):
+    
+    def retrieve_crucial_screen_data(self):
         self.screen_infos.current_health = get_current_health()
-        self.screen_infos.allied_minions_nb = get_nb_allied_minion()
         self.screen_infos.enemy_champions_nb = get_nb_enemy_champion()
-        self.screen_infos.current_health = get_current_health()
 
-    def update_useful_data(self):
+    def retrieve_others_screen_data(self):
+        self.screen_infos.allied_minions_nb = get_nb_allied_minion()
         self.screen_infos.allied_champions_nb = get_nb_allied_champion()
         self.screen_infos.enemy_minions_nb = get_nb_enemy_minion()
-        self.screen_infos.max_health = get_max_health()
         self.screen_infos.current_mana = get_current_mana()
+        self.screen_infos.max_health = get_max_health()
         self.screen_infos.max_mana = get_max_mana()
-
-    def update_minor_data(self):
         self.screen_infos.is_at_fountain = is_at_fountain()
         self.screen_infos.gold = get_gold()
-
-    def fast_thread(self):
+    
+    def crucial_thread(self):
         while self.running:
-            self.update_crucial_data()
+            self.retrieve_crucial_screen_data()
 
-    def middle_thread(self):    
+    def normal_thread(self):    
         while self.running:
-            self.update_useful_data()
+            self.retrieve_others_screen_data()
 
     def slow_thread(self):
-        while self.running:
-            self.update_minor_data()
+        print('.')
+        #while self.running:
+        #    self.update_minor_data()
 
     def behavior_loop(self):
         while self.running:

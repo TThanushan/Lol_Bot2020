@@ -1,6 +1,6 @@
 """All functions for image processing"""
-import cv2
 from PIL import ImageGrab
+import cv2
 import numpy as np
 import utils
 import pytesseract
@@ -17,7 +17,7 @@ def capture_screen(pos_x=0, pos_y=0, width=1920, height=1080, resize=1):
     if resize != 1:
         frame = cv2.resize(frame, (round(width/resize), round(height/resize)))
     return frame
-
+    
 def createTrackbar(name, win_name, value, count):
     def nothing(x):
         x += 0
@@ -135,15 +135,15 @@ def screen_text_to_string(TEXT_INFOS, reverse_color=True, hsv_bound=False):
     text = img_to_text(img)
     return text
 
+
 def get_shapes_contours(shapes_hsv_bound):
     frame = capture_screen(resize=1.5)
     res = apply_hsv_color_mask(frame, shapes_hsv_bound)
-    hide_image_outer_area([res], (240, 80), (960, 560))
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
     _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
     dilated = cv2.dilate(thresh, None, iterations=3)
-    contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     return contours
 
 def get_shapes_nb(shapes_hsv):

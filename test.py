@@ -9,10 +9,10 @@ import time
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 SHAPE_INFOS = {
-    "point1_location_area" : [1167, 1051],
-    "point2_location_area" : [1240, 1070],
-    "l_b" : [0, 50, 75],
-    "u_b" : [255, 255, 255]
+    "min_size" : 100,
+    "max_size" : 400,
+    "l_b" : [0, 135, 110],
+    "u_b" : [0, 140, 205]
     } 
 
 def create_trackbars():
@@ -53,7 +53,7 @@ def get_text_from_screen_test():
 
 #get_text_from_screen_test()
 #bug when trying to get gold from screen, exemple when trying to get 17 (11min20)
-def text_finding():
+def find_shape():
     createTrackbar("LH", "win2", SHAPE_INFOS["l_b"][0], 255)
     createTrackbar("LS", "win2", SHAPE_INFOS["l_b"][1], 255)
     createTrackbar("LV", "win2", SHAPE_INFOS["l_b"][2], 255)
@@ -61,6 +61,9 @@ def text_finding():
     createTrackbar("UH", "win2", SHAPE_INFOS["u_b"][0], 255)
     createTrackbar("US", "win2", SHAPE_INFOS["u_b"][1], 255)
     createTrackbar("UV", "win2", SHAPE_INFOS["u_b"][2], 255)
+    createTrackbar("min_size", "win2", SHAPE_INFOS["min_size"], 1000)
+    createTrackbar("max_size", "win2", SHAPE_INFOS["min_size"], 1000)
+    createTrackbar("bp", "win2", 3, 20)
     
     frame = capture_screen(resize=1.5)
     while (True):
@@ -81,23 +84,31 @@ def text_finding():
        
         gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(gray, (5, 5), 0)
-        _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
+        bp = cv2.getTrackbarPos("bp", "win2")
+        if bp % 2 == 0:
+            bp = bp + 1
+        blur2 = cv2.medianBlur(gray, bp)
+        _, thresh = cv2.threshold(blur2, 20, 255, cv2.THRESH_BINARY)
         dilated = cv2.dilate(thresh, None, iterations=3)
-        contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(dilated, cv2.RETR_LIST , cv2.CHAIN_APPROX_SIMPLE)
         for contour in contours:
             (x, y, w, h) = cv2.boundingRect(contour)
-            obj_size_wanted = cv2.getTrackbarPos("obj_size", "win2")
+            min_size = cv2.getTrackbarPos("min_size", "win2")
+            max_size = cv2.getTrackbarPos("max_size", "win2")
             contour_area = cv2.contourArea(contour)
-            if contour_area > (obj_size_wanted * 0.5) and contour_area < obj_size_wanted:
+            if contour_area > min_size and contour_area < max_size:
                 cv2.rectangle(res, (x, y), (x+w, y+h), (0, 255, 0), 2)
-        cv2.imshow("frame", frame)
-        cv2.imshow("mask", mask)
+        #cv2.imshow("frame", frame)
+        #cv2.imshow("mask", mask)
         cv2.imshow("res", res)
+        cv2.imshow("beforeblur", gray)
+        #cv2.imshow("blur", blur)
+        cv2.imshow("blur2", blur2)
         if cv2.waitKey(40) == 27:
             break
     cv2.destroyAllWindows()
 
-#text_finding()
+find_shape()
 
 def test_capture():
     p1 = SHAPE_INFOS["point1_location_area"]

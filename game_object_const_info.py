@@ -7,8 +7,8 @@ ALLIED_MINIONS_INFOS = {
 ENEMY_MINIONS_INFOS = {
     "min_size" : 125,
     "max_size" : 500,
-    "l_b" : [0, 120, 75],
-    "u_b" : [0, 245, 185]
+    "l_b" : [0, 135, 110],
+    "u_b" : [0, 140, 205]
     }
 
 ALLIED_CHAMPIONS_INFOS = {
