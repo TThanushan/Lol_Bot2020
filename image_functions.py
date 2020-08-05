@@ -4,20 +4,21 @@ import cv2
 import numpy as np
 import utils
 import pytesseract
+from window_capture import windowCapture
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-def capture_screen(pos_x=0, pos_y=0, width=1920, height=1080, resize=1):
-    """capture_screen(pos_x, pos_y, width, height, resize) -> image\n
-    Return an screen capture under image format, you can resize it, 
-    the resolution will be divided by resize"""
-    #bbox specifies specific region (bbox= x,y,width,height)
-    img = ImageGrab.grab(bbox = (pos_x, pos_y, width, height))
-    img_np = np.array(img)
-    frame = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
-    if resize != 1:
-        frame = cv2.resize(frame, (round(width/resize), round(height/resize)))
-    return frame
-    
+# def capture_screen(pos_x=0, pos_y=0, width=1920, height=1080, resize=1):
+#     """capture_screen(pos_x, pos_y, width, height, resize) -> image\n
+#     Return an screen capture under image format, you can resize it, 
+#     the resolution will be divided by resize"""
+#     #bbox specifies specific region (bbox= x,y,width,height)
+#     img = ImageGrab.grab(bbox=(pos_x, pos_y, width, height))
+#     img_np = np.array(img)
+#     frame = cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)
+#     if resize != 1:
+#         frame = cv2.resize(frame, (round(width/resize), round(height/resize)))
+#     return frame
+
 def createTrackbar(name, win_name, value, count):
     def nothing(x):
         x += 0
@@ -25,7 +26,7 @@ def createTrackbar(name, win_name, value, count):
     cv2.createTrackbar(name, win_name, value, count, nothing)    
 
 def find_image_on_screen(image_name, threshold_value=0.99):
-    capture = capture_screen()
+    capture = windowCapture.get_screenshot()
     capture = cv2.cvtColor(capture, cv2.COLOR_BGR2GRAY)
     template = cv2.imread("ressources/"+image_name, 0)
     w, h = template.shape[::-1]
@@ -60,8 +61,8 @@ def get_nb_image_occurence_on_screen(image_name, threshold_value=0.99):
 def get_moving_object_by_size(size_wanted=1000):
     """Get position of a moving object that's equal to the size given
     in parameter"""
-    frame1 = capture_screen()
-    frame2 = capture_screen()
+    frame1 = windowCapture.get_screenshot()
+    frame2 = windowCapture.get_screenshot()
     diff = cv2.absdiff(frame1, frame2)
     gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)
@@ -73,8 +74,6 @@ def get_moving_object_by_size(size_wanted=1000):
             return contour
     return None
 
-
-
 def apply_hsv_color_mask(frame, hsv_bound):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     l_b = np.array([hsv_bound["l_b"][0], hsv_bound["l_b"][1], hsv_bound["l_b"][2]])
@@ -82,29 +81,6 @@ def apply_hsv_color_mask(frame, hsv_bound):
     mask = cv2.inRange(hsv, l_b, u_b)
     res = cv2.bitwise_and(frame, frame, mask=mask)
     return res
-
-def is_obj_moving(frame, next_frame, obj_size):
-    diff = cv2.absdiff(frame, next_frame)
-    gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-    blur = cv2.GaussianBlur(gray, (5, 5), 0)
-    _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
-    dilated = cv2.dilate(thresh, None, iterations=3)
-    contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for contour in contours:
-        contour_area = cv2.contourArea(contour)
-        if contour_area > obj_size and contour_area < obj_size * 1.3:
-            return True
-    return False
-
-def is_obj_of_color_moving(obj_size, hsv_bound, pt1=(0, 0), pt2=(0, 0), \
-    color=(0, 0, 0), resize=1):
-    frame1 = capture_screen(resize=resize)
-    frame2 = capture_screen(resize=resize)
-    if np.any(pt2) != 0:
-        hide_image_outer_area([frame1, frame2], pt1, pt2, color)
-    frame1 = apply_hsv_color_mask(capture_screen(), hsv_bound)
-    frame2 = apply_hsv_color_mask(capture_screen(), hsv_bound)
-    return is_obj_moving(frame1, frame2, obj_size)
 
 def hide_image_outer_area(frames, pt1, pt2, color=(0, 0, 0)):
     for frame in frames:
@@ -125,7 +101,8 @@ def screen_text_to_string(TEXT_INFOS, reverse_color=True, hsv_bound=False):
     """
     p1 = TEXT_INFOS["point1_location_area"]
     p2 = TEXT_INFOS["point2_location_area"]
-    img = capture_screen(p1[0], p1[1], p2[0], p2[1])
+    img = windowCapture.get_screenshot()
+    hide_image_outer_area(img, p1, p2)
     if hsv_bound is True:
         img = apply_hsv_color_mask(img, TEXT_INFOS)
     if reverse_color:
@@ -137,7 +114,7 @@ def screen_text_to_string(TEXT_INFOS, reverse_color=True, hsv_bound=False):
 
 
 def get_shapes_contours(shapes_hsv_bound):
-    frame = capture_screen(resize=1.5)
+    frame = windowCapture.get_screenshot()
     res = apply_hsv_color_mask(frame, shapes_hsv_bound)
     gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(gray, (5, 5), 0)

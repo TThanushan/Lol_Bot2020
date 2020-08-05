@@ -83,7 +83,7 @@ def find_shape():
         res = cv2.bitwise_and(frame, frame, mask=mask)
        
         gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
-        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        # blur = cv2.GaussianBlur(gray, (5, 5), 0)
         bp = cv2.getTrackbarPos("bp", "win2")
         if bp % 2 == 0:
             bp = bp + 1

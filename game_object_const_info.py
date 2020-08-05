@@ -1,3 +1,5 @@
+"""Contains constant variables that have informations on in-game object"""
+
 ALLIED_MINIONS_INFOS = {
     "min_size" : 125,
     "max_size" : 500,

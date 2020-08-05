@@ -1,25 +1,19 @@
-import directkeys as dk
 import random
 import time
-import image_functions as imf
-import threading
 import utils
-from other_class import *
-from bot_functions import *
+import directkeys as dk
+import other_class
+import game_data
 
 class Bot:
     """
     Bot class.
     """
     running = True
-    shortcut = Shortcut()
-    item_build = ItemBuild()
-    screen_infos = ScreenInfos()
+    shortcut = other_class.Shortcut()
+    item_build = other_class.ItemBuild()
+    GameData = game_data.GameData()
     action = "not set"
-    pause = False
-    item_index = 0
-    champ_name = "Darius"
-    is_left_side = False
     is_do_once = False
     forward_pos = [0, 0]
     LEFT_FORWARD_POS = (1677, 894)
@@ -27,9 +21,7 @@ class Bot:
 
     def do_once(self):
         if not self.is_do_once:
-            # self.buy_starter_items()
-            self.is_left_side = imf.is_starting_on_left_side()
-            if self.is_left_side:
+            if self.GameData.is_left_side:
                 self.forward_pos = self.LEFT_FORWARD_POS
             else:
                 self.forward_pos = self.RIGHT_FORWARD_POS
@@ -40,39 +32,3 @@ class Bot:
     def move_forward(self):
         dk.mouse_pos(self.forward_pos[0], self.forward_pos[1])
         dk.mouse_right_click()
-    
-    def retrieve_crucial_screen_data(self):
-        self.screen_infos.current_health = get_current_health()
-        self.screen_infos.enemy_champions_nb = get_nb_enemy_champion()
-
-    def retrieve_others_screen_data(self):
-        self.screen_infos.allied_minions_nb = get_nb_allied_minion()
-        self.screen_infos.allied_champions_nb = get_nb_allied_champion()
-        self.screen_infos.enemy_minions_nb = get_nb_enemy_minion()
-        self.screen_infos.current_mana = get_current_mana()
-        self.screen_infos.max_health = get_max_health()
-        self.screen_infos.max_mana = get_max_mana()
-        self.screen_infos.is_at_fountain = is_at_fountain()
-        self.screen_infos.gold = get_gold()
-    
-    def crucial_thread(self):
-        while self.running:
-            self.retrieve_crucial_screen_data()
-
-    def normal_thread(self):    
-        while self.running:
-            self.retrieve_others_screen_data()
-
-    def slow_thread(self):
-        print('.')
-        #while self.running:
-        #    self.update_minor_data()
-
-    def behavior_loop(self):
-        while self.running:
-            if self.screen_infos.at_fountain:
-                self.item_build.try_to_buy_current_item()
-                self.move_forward()
-                time.sleep(2)
-                if self.screen_infos.allied_minions_nb:
-                    print("bip")

@@ -13,9 +13,9 @@ class WindowCapture:
     cropped_y = 0
     offset_x = 0
     offset_y = 0
-
     # constructor
     def __init__(self, window_name):
+        self.screenshot = []
         # find the handle for the window we want to capture
         self.hwnd = win32gui.FindWindow(None, window_name)
         if not self.hwnd:
@@ -40,6 +40,9 @@ class WindowCapture:
         self.offset_y = window_rect[1] + self.cropped_y
 
     def get_screenshot(self):
+        return self.screenshot
+
+    def get_new_screenshot(self):
 
         # get the window image data
         wDC = win32gui.GetWindowDC(self.hwnd)
@@ -73,7 +76,7 @@ class WindowCapture:
         # see the discussion here:
         # https://github.com/opencv/opencv/issues/14866#issuecomment-580207109
         img = np.ascontiguousarray(img)
-
+        self.screenshot = tuple(img)
         return img
 
     # find the name of the window you're interested in.
@@ -92,3 +95,5 @@ class WindowCapture:
     # the __init__ constructor.
     def get_screen_position(self, pos):
         return (pos[0] + self.offset_x, pos[1] + self.offset_y)
+
+windowCapture = WindowCapture('CaptureTest.png  - 1919 x 1079')

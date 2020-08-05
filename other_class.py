@@ -1,6 +1,7 @@
-import directkeys as dk
 import time
+import random
 import image_functions as imf
+import directkeys as dk
 
 class ItemBuild:
 	#index : [name, price]
@@ -21,21 +22,21 @@ class ItemBuild:
         12 : ["thornmail", 2900],
     }
 
-    def get_current_item_name():
-        return build_order[current_index][0]
+    def get_current_item_name(self):
+        return self.build_order[self.current_index][0]
     
-    def get_current_item_price():
-        return build_order[current_index][1]
+    def get_current_item_price(self):
+        return self.build_order[self.current_index][1]
     
-    def open_shop():
-        dk.PressKey(self.shortcut["toggle shop"])
+    def open_shop(self):
+        dk.PressKey('p')
     
     def select_search_bar():
         dk.MaintainKey('ctrl')
         dk.PressKey('l')
         dk.ReleaseKey('ctrl')
     
-    def type_current_item_name():
+    def type_current_item_name(self):
         dk.type_text(self.get_current_item_name())
     
     def buy_selected_item():
@@ -47,7 +48,7 @@ class ItemBuild:
     def close_shop():
         dk.PressKey('esc')
     
-    def try_to_buy_current_item(self, screen_infos):
+    def try_to_buy_current_item(self):
         """
         Try to buy an item from the shop by typing the name.
         """

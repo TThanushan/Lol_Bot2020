@@ -1,109 +1,79 @@
 """Main file"""
-import cv2
-import Bot as botmod
 import threading
-from time import time 
-import os
-from bot_functions import *
+import time
+import cv2
+import bot
+import application_window as app_win
+from window_capture import windowCapture
+import game_data
+import image_functions as img_func
 
-bot = botmod.Bot()
-
-def createTrackbar(name, win_name, value, count):
-    def nothing(x):
-        x += 0
-    cv2.namedWindow(win_name)
-    cv2.createTrackbar(name, win_name, value, count, nothing)    
-
-def change_color(bool_v):
-    if bool_v:
-        return (0, 255, 0)
-    return (0, 0, 255)
-
-COLORS = {
-    "White" : [255, 255, 255],
-    "Red" : [255, 42, 0],
-    "Green" : [130, 245, 157],
-    "Yellow" : [255, 213, 0],
-    "Blue" : [3, 190, 252],
-    "Cyan" : [148, 228, 255],
-    "Orange" : [255, 213, 0],
-    }
-TEXT_COLORS = [COLORS["Green"],
-               COLORS["Blue"],
-               COLORS["White"],
-               COLORS["Cyan"],
-               COLORS["Orange"],
-               COLORS["Red"],
-               COLORS["Orange"],
-               COLORS["Green"],
-               COLORS["Yellow"],
-               ]
-def RGB2BGR(color):
-    return (color[2], color[1], color[0])
-def display_all_screen_infos(img):
-    x_text_pos = 50
-    y_text_pos = 70
-    y_spacing = 50
-    all_infos = bot.screen_infos.get_all_properties()
-    color_index = 0
-    for attr in all_infos:
-        img = cv2.putText(img, attr + ': ' + str(all_infos[attr]), (x_text_pos, y_text_pos),\
-            cv2.FONT_HERSHEY_SIMPLEX, 1, RGB2BGR(TEXT_COLORS[color_index]), 2)
-        y_text_pos = y_text_pos + y_spacing
-        color_index = color_index + 1
-
-def create_app_win():
-    win = cv2.namedWindow("Wombot")
-    img = cv2.imread("ressources/gui/background.png")
-    while bot.running:
-        img = cv2.imread("ressources/gui/background.png")
-        display_all_screen_infos(img)
-        img = cv2.resize(img, (500, 425), interpolation=cv2.INTER_AREA)
-        cv2.imshow("Wombot", img)
-        key_pressed = cv2.waitKey(1)
-        if str(key_pressed) == '27':
-            bot.running = False
-    cv2.destroyAllWindows()
-
-max_nb = 0
-def test():
-    global max_nb
-    if bot.screen_infos.enemy_minions_nb != max_nb:
-        max_nb = bot.screen_infos.enemy_minions_nb
-        print(max_nb)
+Bot = bot.Bot()
+GameData = game_data.GameData()
 
 def main():
-    t_app = threading.Thread(target=create_app_win)
-    t1 = threading.Thread(target=bot.crucial_thread)
-    t2 = threading.Thread(target=bot.normal_thread)
-    #t3 = threading.Thread(target=bot.slow_thread)
-    #t4 = threading.Thread(target=bot.behavior_loop)
+    t_app = threading.Thread(target=app_win.create_app_win(Bot.GameData))
+    # thread_1 = threading.Thread(target=crucial_thread)
+    # thread_2 = threading.Thread(target=normal_thread)
 
     t_app.start()
-    t1.start()
-    t2.start()
-    #t3.start()
-    #t4.start()
-#create_app_win()
+    # thread_1.start()
+    # thread_2.start()
 
-main()
+# main()
 
-"""
-import window_capture
 
-wincap = window_capture.WindowCapture('League of Legends')
-loop_time = time()
+
+# wincap = window_capture.WindowCapture('*Untitled - Notepad')
+# GameData = game_data.GameData()
+loop_time = time.time()
+
+
+ALLIED_MINIONS_INFOS = {
+    "min_size" : 125,
+    "max_size" : 500,
+    "l_b" : [0, 135, 110],
+    "u_b" : [0, 140, 205]
+    }
+
+def get_shapes_contours(shapes_hsv_bound, frame):
+    # frame = capture_screen(resize=1.5)
+    res =  img_func.apply_hsv_color_mask(frame, shapes_hsv_bound)
+    gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
+    blur = cv2.GaussianBlur(gray, (5, 5), 0)
+    _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
+    dilated = cv2.dilate(thresh, None, iterations=3)
+    contours, _ = cv2.findContours(dilated, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    return contours
+
+def get_shapes_pos(shapes_hsv, frame):
+    positions = []
+    contours = get_shapes_contours(shapes_hsv, frame)
+    for contour in contours:
+        contour_area = cv2.contourArea(contour)
+        if contour_area > shapes_hsv["min_size"] and contour_area < shapes_hsv["max_size"]:
+            (x, y, w, h) = cv2.boundingRect(contour)
+            positions.append([round(x+w/2), round(y)])
+    return positions
+
+def draw_contour(img, contours):
+    if len(contours) == 0:
+        return
+    for contour in contours:
+        cv2.circle(img, tuple(contour), 4, (0, 255, 0))
 while True:
-    
-   screenshot = wincap.get_screenshot()
-   cv2.imshow('Computer Vision', screenshot)
-    
-   if time() - loop_time != 0:
-       print('FPS {}'.format(1 / (time() - loop_time)))
-   loop_time = time()
+    screenshot = windowCapture.get_new_screenshot()
+    all_pos = get_shapes_pos(ALLIED_MINIONS_INFOS, screenshot)
+    draw_contour(screenshot, all_pos)
+    cv2.imshow('Computer Vision', screenshot)
 
-   if cv2.waitKey(1) == ord('q'):
-       cv2.destroyAllWindows()
-       break
+    if time.time() - loop_time != 0:
+        print('FPS {}'.format(1 / (time.time() - loop_time)))
+    loop_time = time.time()
+
+    if cv2.waitKey(1) == ord('q'):
+        cv2.destroyAllWindows()
+        break
 print('done')
-"""
+
+
